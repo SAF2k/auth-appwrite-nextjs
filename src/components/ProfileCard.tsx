@@ -16,7 +16,7 @@ const ProfileCard = () => {
     (async () => {
       const userData = await appwriteService.getCurrentUser();
       if (userData) {
-        setUser(userData);
+        setUser(userData)
       }
     })();
   }, []);
