@@ -1,49 +1,52 @@
 "use client";
 
-import useAuth from "@/context/useAuth";
+import appwriteService from "@/appwrite/config";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import appwriteService from "@/appwrite/config";
+import useAuth from "@/context/useAuth";
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email." }),
-  password: z.string().min(2, {
+  name: z.string().min(2, {
     message: "Username must be at least 2 characters.",
+  }),
+  email: z.string().email({ message: "Please enter a valid email." }),
+  password: z.string().min(6, {
+    message: "Password must be at least 6 characters.",
   }),
 });
 
-export default function Login() {
+export default function Signup() {
   const router = useRouter();
-  const { setAuthStatus } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { setAuthStatus } = useAuth();
 
-  const {register, handleSubmit, formState } = useForm<z.infer<typeof formSchema>>({
+  const { register, handleSubmit, formState } = useForm<
+    z.infer<typeof formSchema>
+  >({
     resolver: zodResolver(formSchema),
   });
-  
 
-  const onLogin = async (values: z.infer<typeof formSchema>) => {
+  const onSignup = async (values: z.infer<typeof formSchema>) => {
     try {
-        setLoading(true);
-        const session = await appwriteService.login(values)
-        if (session) {
-            setAuthStatus(true);
-            router.push("/profile");
-        }
+      const userData = await appwriteService.createUserAccount(values);
+      if (userData) {
+        setAuthStatus(true);
+        router.push("/profile");
+      } 
     } catch (error: any) {
-        setError(error.message);
-    }
-    finally {
-        setLoading(false);
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
     console.log(values);
   };
+
   return (
     <div className="flex items-center justify-center w-full">
       <div className="mx-auto w-full max-w-lg bg-gray-200/50 rounded-xl p-10">
@@ -53,20 +56,42 @@ export default function Login() {
           </span>
         </div>
         <h2 className="text-center text-2xl font-bold leading-tight text-black">
-          Sign in to your account!
+          Sign up to create account
         </h2>
         <p className="mt-2 text-center text-base text-gray-600">
-          Don&apos;t have any account?&nbsp;
+          Already have an account?&nbsp;
           <Link
-            href="/signup"
-            className="mt-2 text-center text-base text-primary"
+            href="/login"
+            className="font-medium text-primary transition-all duration-200 hover:underline"
           >
-            Sign up
+            Sign In
           </Link>
         </p>
         {error && <p className="text-red-600 mt-8 text-center">{error}</p>}
-        <form onSubmit={handleSubmit(onLogin)} className="mt-8">
+        <form onSubmit={handleSubmit(onSignup)} className="mt-8">
           <div className="space-y-5">
+            <div>
+              <label
+                htmlFor="name"
+                className="text-base font-medium text-gray-900"
+              >
+                User Name
+              </label>
+              <div className="mt-2">
+                <input
+                  type="text"
+                  id="name"
+                  {...register("name")}
+                  className="flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:ring-offset-1 disabled: cursor-not-allowed disabled:opacity-50"
+                  placeholder="Username"
+                />
+                {formState.errors.name && (
+                  <p className="text-red-600">
+                    {formState.errors.name.message}
+                  </p>
+                )}
+              </div>
+            </div>
             <div>
               <label
                 htmlFor="email"
@@ -129,7 +154,7 @@ export default function Login() {
                     />
                   </span>
                 )}
-                Sign in
+                Sign up
               </button>
             </div>
           </div>
