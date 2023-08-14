@@ -1,16 +1,19 @@
-'use client'
+"use client";
 
-import Image from 'next/image'
+import Image from "next/image";
 
-import useAuth from '@/context/useAuth';
-import Login from '@/components/Login';
+import useAuth from "@/context/useAuth";
+import Login from "@/components/Login";
+import Header from "@/components/Header";
+import ProfileCard from "@/components/ProfileCard";
 
 export default function Home() {
-  const {authStatus} = useAuth();
+  const { authStatus } = useAuth();
   return (
     <div className="w-full max-w-7xl mx-auto px-8">
+      <Header />
       <div className="flex flex-wrap -mx-2 mt-32 gap-y-8">
-        <div className="w-full md:w-1/2 lg:w-1/3 px-2">
+        <div className="w-full sm:w-1/2 px-2 flex justify-center flex-wrap items-center">
           <div className="relative text-center w-full flex justify-center items-center flex-wrap">
             <div className="w-full max-w-[100px]">
               <Image src="/favicon.ico" alt="image" width={100} height={100} />
@@ -33,8 +36,7 @@ export default function Home() {
         <div className="w-full sm:w-1/2 px-2 flex flex-wrap justify-end">
           {authStatus ? (
             <div className="max-w-full">
-              {/* <ProfileCard /> */}
-              <h1>Profile</h1>
+              <ProfileCard />
             </div>
           ) : (
             <Login />
